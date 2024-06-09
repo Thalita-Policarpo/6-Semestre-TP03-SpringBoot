@@ -3,7 +3,8 @@ package com.example.ensinotp03springboot.service;
 import com.example.ensinotp03springboot.model.Curso;
 import com.example.ensinotp03springboot.repository.CursoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,41 +16,31 @@ public class CursoService {
     @Autowired
     private CursoRepository cursoRepository;
 
-    @Autowired
-    private RedisTemplate<String, Curso> redisTemplate;
-
-    public Curso save(Curso curso) {
-        Curso savedCurso = cursoRepository.save(curso);
-        redisTemplate.opsForValue().set("curso:" + savedCurso.getId(), savedCurso);
-        return savedCurso;
+    @Cacheable(value = "cursos", key = "#id")
+    public Optional<Curso> getById(int id) {
+        return cursoRepository.findById(id);
     }
 
+    @Cacheable("cursos")
     public List<Curso> getAll() {
         return cursoRepository.findAll();
     }
 
-    public Optional<Curso> getById(int id) {
-        String cacheKey = "curso:" + id;
-        Curso curso = redisTemplate.opsForValue().get(cacheKey);
-        if (curso == null) {
-            Optional<Curso> optionalCurso = cursoRepository.findById(id);
-            optionalCurso.ifPresent(value -> redisTemplate.opsForValue().set(cacheKey, value));
-            return optionalCurso;
-        }
-        return Optional.of(curso);
-    }
-
+    @CacheEvict(value = "cursos", key = "#id")
     public void deleteById(int id) {
         cursoRepository.deleteById(id);
-        redisTemplate.delete("curso:" + id);
     }
 
+    @CacheEvict(value = "cursos", key = "#id")
     public Curso update(int id, Curso cursoUpdate) {
         return cursoRepository.findById(id).map(curso -> {
             curso.setNome(cursoUpdate.getNome());
-            Curso updatedCurso = cursoRepository.save(curso);
-            redisTemplate.opsForValue().set("curso:" + updatedCurso.getId(), updatedCurso);
-            return updatedCurso;
+            return cursoRepository.save(curso);
         }).orElse(null);
+    }
+
+    @CacheEvict(value = "cursos", allEntries = true)
+    public Curso save(Curso curso) {
+        return cursoRepository.save(curso);
     }
 }
