@@ -2,11 +2,11 @@ package com.example.ensinotp03springboot.controller;
 
 import com.example.ensinotp03springboot.model.Aluno;
 import com.example.ensinotp03springboot.service.AlunoService;
-import jakarta.persistence.Cacheable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @RestController
@@ -22,17 +22,22 @@ public class AlunoController {
     }
 
     @GetMapping
-    public List<Aluno> getAllAlunos() {
-        return alunoService.getAllAlunos();
+    public List<Aluno> getAll() {
+        return alunoService.getAll();
     }
 
-    @GetMapping("/sem-cache")
-    public String getAllAlunosSemCache() {
-        long start = System.currentTimeMillis();
-        List<Aluno> alunos = alunoService.getAllSemcache();
-        long end = System.currentTimeMillis();
-        long duration = end - start;
+    @GetMapping("/{id}")
+    public Optional<Aluno> getAlunoById(@PathVariable int id) {
+        return alunoService.getById(id);
+    }
 
-        return "duracção com cache: " + duration+ "ms";
+    @DeleteMapping("/{id}")
+    public void deleteById(@PathVariable int id) {
+        alunoService.deleteById(id);
+    }
+
+    @PutMapping("/{id}")
+    public Aluno updateById(@PathVariable int id, @RequestBody Aluno aluno) {
+        return alunoService.update(id, aluno);
     }
 }
