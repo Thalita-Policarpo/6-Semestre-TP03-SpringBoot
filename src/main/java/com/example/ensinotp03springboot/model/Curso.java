@@ -1,12 +1,11 @@
 package com.example.ensinotp03springboot.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -17,7 +16,8 @@ public class Curso {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private String titulo;
-    private String periodo;
+    private String nome;
 
+    @ManyToMany(mappedBy = "cursos")
+    private Set<Aluno> alunos;
 }
