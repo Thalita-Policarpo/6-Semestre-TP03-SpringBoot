@@ -26,12 +26,12 @@ public class CursoService {
         return cursoRepository.findAll();
     }
 
-    @CacheEvict(value = "cursos", key = "#id")
+    @CacheEvict(value = "cursos", allEntries = true)
     public void deleteById(int id) {
         cursoRepository.deleteById(id);
     }
 
-    @CacheEvict(value = "cursos", key = "#id")
+    @CacheEvict(value = "cursos", allEntries = true)
     public Curso update(int id, Curso cursoUpdate) {
         return cursoRepository.findById(id).map(curso -> {
             curso.setNome(cursoUpdate.getNome());
